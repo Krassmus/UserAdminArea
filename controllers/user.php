@@ -2,6 +2,12 @@
 
 class UserController extends PluginController
 {
+    function before_filter(&$action, &$args)
+    {
+        $this->utf8decode_xhr = true;
+        parent::before_filter($action, $args);
+    }
+
     public function overview_action()
     {
         Navigation::activateItem("/admin/user/admin");
@@ -36,6 +42,9 @@ class UserController extends PluginController
             $query->where("inactive_days", "user_online.last_lifesign <= UNIX_TIMESTAMP() - :inactive_days * 86400", array(
                 'inactive_days' => $GLOBALS['user']->cfg->ADMIN_USER_INACTIVITY
             ));
+        }
+        if ($GLOBALS['user']->cfg->ADMIN_USER_NEVER_ONLINE) {
+            $query->where("never_online", "auth_user_md5.user_id NOT IN (SELECT user_id FROM user_online)");
         }
         if ($query->count() <= 500) {
             $this->users = $query->fetchAll("User");
@@ -72,6 +81,74 @@ class UserController extends PluginController
                             $user['lock_rule'] = null;
                         } else {
                             $user['lock_rule'] = Request::get("lock_rule");
+                        }
+                    }
+                    if ($change === "add_institut_id" && Request::option("add_institut_id") && $GLOBALS['perm']->have_perm("admin")) {
+                        $member = InstituteMember::findOneBySQL("user_id = ? AND institut_id = ?", array($user->getId(), Request::option("add_institut_id")));
+                        if (!$member) {
+                            $member = new InstituteMember();
+                            $member['user_id'] = $user->getId();
+                            $member['institut_id'] = Request::option("add_institut_id");
+                        }
+                        switch ($user['perms']) {
+                            case "autor":
+                                $member['inst_perms'] = "user";
+                                break;
+                            case "tutor":
+                                $member['inst_perms'] = "autor";
+                                break;
+                            case "dozent":
+                                $member['inst_perms'] = "dozent";
+                                break;
+                            case "admin":
+                                $member['inst_perms'] = "admin";
+                                break;
+                            default:
+                                $member['inst_perms'] = null;
+                        }
+                        if ($member['inst_perms']) {
+                            $member->store();
+                        }
+                    }
+                    if ($change === "remove_institut_id" && Request::option("remove_institut_id") && $GLOBALS['perm']->have_perm("admin")) {
+                        $member = InstituteMember::findOneBySQL("user_id = ? AND institut_id = ?", array($user->getId(), Request::option("remove_institut_id")));
+                        if ($member) {
+                            $member->delete();
+                        }
+                    }
+                    if ($change === "visible" && Request::get("visible")) {
+                        $user['visible'] = Request::get("visible");
+                    }
+                    if ($change === "password" && Request::get("password")) {
+                        if (Request::get("password") === "generate") {
+                            $manager = new UserManagement();
+                            $password = $manager->generate_password(6);
+                        } else {
+                            $password = Request::get("new_password");
+                        }
+                        if ($password) {
+                            $hash = UserManagement::getPwdHasher()->HashPassword($password);
+                            $user['password'] = $hash;
+                            if (!Request::get("changed_password_mail")) {
+                                $user_language = getUserLanguagePath($user->getId());
+                                $Zeit = date("H:i:s, d.m.Y", time());
+                                $this->user_data = new UserDataAdapter($user);
+                                include("locale/$user_language/LC_MAILS/password_mail.inc.php");
+                            } else {
+                                $subject = Request::get("changed_password_subject");
+                                $mailbody = Request::get("changed_password_mailbody");
+                                $parameters = $user->toArray();
+                                $parameters['password'] = $password;
+                                $parameters['link'] = $GLOBALS['ABSOLUTE_URI_STUDIP'];
+                                foreach ($parameters as $parameter => $value) {
+                                    $subject = str_replace("{{".$parameter."}}", $value, $subject);
+                                    $mailbody = str_replace("{{".$parameter."}}", $value, $mailbody);
+                                }
+                            }
+                            if ($subject && $mailbody) {
+                                StudipMail::sendMessage($user['email'], $subject, $mailbody);
+                                log_event("USER_NEWPWD", $user->getId());
+                            }
                         }
                     }
                     if (strpos($change, "datafield_") === 0) {
@@ -154,6 +231,12 @@ class UserController extends PluginController
         if (Request::submitted("inactivity") || Request::get("reset-search")) {
             $GLOBALS['user']->cfg->store('ADMIN_USER_INACTIVITY', Request::get("inactivity"));
         }
+        $this->redirect("user/overview");
+    }
+
+    public function toggle_never_online_action()
+    {
+        $GLOBALS['user']->cfg->store('ADMIN_USER_NEVER_ONLINE', !$GLOBALS['user']->cfg->ADMIN_USER_NEVER_ONLINE);
         $this->redirect("user/overview");
     }
 

@@ -3,6 +3,10 @@
           method="post"
           data-dialog>
         <table class="default">
+            <caption>
+                <?= _("Benutzer") ?>
+                <span class="actions"><?= sprintf("%s Personen", count($users)) ?></span>
+            </caption>
             <thead>
                 <tr>
                     <th></th>
@@ -111,6 +115,15 @@ $inactivity->addNeedle(
     $GLOBALS['user']->cfg->ADMIN_USER_INACTIVITY
 );
 Sidebar::Get()->addWidget($inactivity);
+
+$status_select = new OptionsWidget();
+$status_select->setTitle(_('Eingeloggt-Filter'));
+$status_select->addCheckbox(
+    _("Nutzer, die noch nie eingeloggt waren"),
+    $GLOBALS['user']->cfg->ADMIN_USER_NEVER_ONLINE,
+    PluginEngine::getURL($plugin, array(), "user/toggle_never_online")
+);
+Sidebar::get()->addWidget($status_select);
 
 $actions = new ActionsWidget();
 $actions->addLink(

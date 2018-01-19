@@ -94,6 +94,111 @@
                     </select>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <label>
+                        <input type="checkbox" name="change[]" value="add_institut_id" onChange="jQuery(this).closest('tr').toggleClass('active');">
+                        <?= _("Einrichtung hinzufügen") ?>
+                    </label>
+                </td>
+                <td>
+                    <select name="add_institut_id"
+                            onChange="jQuery(this).closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked');">
+                        <option value=""></option>
+                        <? foreach (Institute::getInstitutes() as $institute) : ?>
+                            <option value="<?= htmlReady($institute['Institut_id']) ?>">
+                                <?= !$institute['is_fak'] ? "&nbsp;&nbsp;" : "" ?>
+                                <?= htmlReady($institute['Name']) ?>
+                            </option>
+                        <? endforeach ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>
+                        <input type="checkbox" name="change[]" value="remove_institut_id" onChange="jQuery(this).closest('tr').toggleClass('active');">
+                        <?= _("Einrichtung entfernen") ?>
+                    </label>
+                </td>
+                <td>
+                    <select name="remove_institut_id"
+                            onChange="jQuery(this).closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked');">
+                        <option value=""></option>
+                        <? foreach (Institute::getInstitutes() as $institute) : ?>
+                            <option value="<?= htmlReady($institute['Institut_id']) ?>">
+                                <?= !$institute['is_fak'] ? "&nbsp;&nbsp;" : "" ?>
+                                <?= htmlReady($institute['Name']) ?>
+                            </option>
+                        <? endforeach ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>
+                        <input type="checkbox" name="change[]" value="visible" onChange="jQuery(this).closest('tr').toggleClass('active');">
+                        <?= _("Sichtbarkeit") ?>
+                    </label>
+                </td>
+                <td>
+                    <? $value = $controller->getAverageValue($users, "visible") ?>
+                    <select type="text"
+                            name="visible"
+                            onChange="jQuery(this).closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked');">
+                        <? if ($value === false) : ?>
+                            <option value=""><?= _("Unterschiedliche Werte") ?></option>
+                        <? endif ?>
+                        <option value="always"<?= $value === "always" ? " selected" : "" ?>><?= _("Immer") ?></option>
+                        <option value="yes"<?= $value === "yes" ? " selected" : "" ?>><?= _("Ja") ?></option>
+                        <option value="unknown"<?= $value === "unknown" ? " selected" : "" ?>><?= _("Undefiniert") ?></option>
+                        <option value="no"<?= $value === "no" ? " selected" : "" ?>><?= _("Nein") ?></option>
+                        <option value="never"<?= $value === "never" ? " selected" : "" ?>><?= _("Niemals") ?></option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>
+                        <input type="checkbox" name="change[]" value="password" onChange="jQuery(this).closest('tr').toggleClass('active');">
+                        <?= _("Passwort") ?>
+                    </label>
+                </td>
+                <td>
+                    <ul class="clean">
+                        <li>
+                            <label>
+                                <input type="radio" name="password" value="generate" onChange="jQuery(this).closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked'); jQuery(this).closest('ul').find('label.option').hide();">
+                                <?= _("Neu generieren") ?>
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="radio" name="password" value="set" onChange="jQuery(this).closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked'); jQuery(this).closest('li').find('label.option').show();">
+                                <?= _("Besonderes Passwort setzen") ?>
+                            </label>
+                            <label class="option" style="display: none;">
+                                <?= _("Neues Passwort") ?>
+                                <input type="text" name="new_password">
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="checkbox" name="changed_password_mail" value="1" value="generate" onChange="jQuery(this).closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked'); jQuery(this).closest('li').find('label.option').toggle(jQuery(this).is(':checked'));">
+                                <?= _("Eigene Nachricht schreiben") ?>
+                            </label>
+                            <label class="option" style="display: none;">
+                                <?= _("Email-Betreff") ?>
+                                <input name="changed_password_subject" type="text">
+                            </label>
+                            <label class="option" style="display: none;">
+                                <?= _("Email-Nachricht") ?>
+                                <textarea name="changed_password_mailbody"></textarea>
+                            </label>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
             <? foreach ($datafields as $datafield) : ?>
                 <tr>
                     <td>
