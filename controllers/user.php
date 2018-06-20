@@ -11,6 +11,7 @@ class UserController extends PluginController
     public function overview_action()
     {
         Navigation::activateItem("/admin/user/admin");
+        PageLayout::setTitle(_("Mehrere Nutzer bearbeiten"));
         $query = \UserAdmin\SQLQuery::table("auth_user_md5")->groupBy("auth_user_md5.user_id");
         if ($GLOBALS['user']->cfg->ADMIN_USER_SEARCHTEXT) {
             $query->where("searchtext","CONCAT_WS(auth_user_md5.Vorname, auth_user_md5.Nachname, auth_user_md5.Email) LIKE :searchtext", array(
@@ -150,6 +151,14 @@ class UserController extends PluginController
                                 log_event("USER_NEWPWD", $user->getId());
                             }
                         }
+                    }
+                    if ($change === "add_userdomain" && Request::option("add_userdomain") && $GLOBALS['perm']->have_perm("admin")) {
+                        $domain = new UserDomain(Request::option("add_userdomain"));
+                        $domain->addUser($user->getId());
+                    }
+                    if ($change === "remove_userdomain" && Request::option("remove_userdomain") && $GLOBALS['perm']->have_perm("admin")) {
+                        $domain = new UserDomain(Request::option("remove_userdomain"));
+                        $domain->removeUser($user->getId());
                     }
                     if (strpos($change, "datafield_") === 0) {
                         $datafield_id = substr($change, strlen("datafield_"));

@@ -199,6 +199,47 @@
                     </ul>
                 </td>
             </tr>
+            <? $userdomains = UserDomain::getUserDomains() ?>
+            <? if (count($userdomains)) : ?>
+                <tr>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="change[]" value="add_userdomain" onChange="jQuery(this).closest('tr').toggleClass('active');">
+                            <?= _("Nutzerdomäne hinzufügen") ?>
+                        </label>
+                    </td>
+                    <td>
+                        <select name="add_userdomain"
+                                onChange="jQuery(this).closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked');">
+                            <option value=""></option>
+                            <? foreach (UserDomain::getUserDomains() as $domain) : ?>
+                                <option value="<?= htmlReady($domain->getID()) ?>">
+                                    <?= htmlReady($domain->getName()) ?>
+                                </option>
+                            <? endforeach ?>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="change[]" value="remove_userdomain" onChange="jQuery(this).closest('tr').toggleClass('active');">
+                            <?= _("Nutzerdomäne entfernen") ?>
+                        </label>
+                    </td>
+                    <td>
+                        <select name="remove_userdomain"
+                                onChange="jQuery(this).closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked');">
+                            <option value=""></option>
+                            <? foreach (UserDomain::getUserDomains() as $domain) : ?>
+                                <option value="<?= htmlReady($domain->getID()) ?>">
+                                    <?= htmlReady($domain->getName()) ?>
+                                </option>
+                            <? endforeach ?>
+                        </select>
+                    </td>
+                </tr>
+            <? endif ?>
             <? foreach ($datafields as $datafield) : ?>
                 <tr>
                     <td>
