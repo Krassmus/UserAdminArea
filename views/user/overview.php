@@ -62,6 +62,28 @@ $search->addNeedle(
 );
 Sidebar::Get()->addWidget($search);
 
+$institute = new SelectWidget(
+    _("Einrichtung"),
+    PluginEngine::getURL($plugin, array(), "user/search_institute"),
+    "institut_id",
+    "post"
+);
+$institute->setOptions(
+    array('' => "")
+);
+foreach (Institute::getMyInstitutes($GLOBALS['user']->id) as $institut) {
+    $institute->addElement(
+        new SelectElement(
+            $institut['Institut_id'],
+            (!$institut['is_fak'] ? "  " : "") . $institut['Name'],
+            $GLOBALS['user']->cfg->ADMIN_USER_INSTITUTE === $institut['Institut_id']
+        ),
+        'select-' . $institut['Institut_id']
+    );
+}
+Sidebar::Get()->addWidget($institute);
+
+
 $locked = new SelectWidget(
     _("Sperr-Filter"),
     PluginEngine::getURL($plugin, array(), "user/search_locked"),

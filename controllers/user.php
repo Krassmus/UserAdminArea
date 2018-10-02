@@ -18,6 +18,12 @@ class UserController extends PluginController
                 'searchtext' => "%".$GLOBALS['user']->cfg->ADMIN_USER_SEARCHTEXT."%"
             ));
         }
+        if ($GLOBALS['user']->cfg->ADMIN_USER_INSTITUTE) {
+            $query->join("user_inst", "user_inst.user_id = auth_user_md5.user_id", "INNER JOIN");
+            $query->where("institute_id","user_inst.Institut_id = :institut_id", array(
+                'institut_id' => $GLOBALS['user']->cfg->ADMIN_USER_INSTITUTE
+            ));
+        }
         if ($GLOBALS['user']->cfg->ADMIN_USER_LOCKED) {
             $query->where("locked","auth_user_md5.locked = :locked", array(
                 'locked' => $GLOBALS['user']->cfg->ADMIN_USER_LOCKED === "locked" ? 1 : 0
@@ -160,6 +166,25 @@ class UserController extends PluginController
                         $domain = new UserDomain(Request::option("remove_userdomain"));
                         $domain->removeUser($user->getId());
                     }
+                    if ($change === "studiengang" && Request::option("studiengang_studiengang_id") && Request::option("studiengang_abschluss_id") && $GLOBALS['perm']->have_perm("admin")) {
+                        $eintrag = UserStudyCourse::findOneBySQL("user_id = :user_id AND studiengang_id = :studiengang_id AND abschluss_id = :abschluss_id", array(
+                            'user_id' => $user->getId(),
+                            'studiengang_id' => Request::option("studiengang_studiengang_id"),
+                            'abschluss_id' => Request::option("studiengang_abschluss_id")
+                        ));
+                        if (!$eintrag) {
+                            $eintrag = new UserStudyCourse();
+                            $eintrag['user_id'] = $user->getId();
+                            $eintrag['studiengang_id'] = Request::option("studiengang_studiengang_id");
+                            $eintrag['abschluss_id'] = Request::option("studiengang_abschluss_id");
+                        }
+                        if (Request::int("studiengang_semester") > 0) {
+                            $eintrag['semester'] = Request::int("studiengang_semester");
+                            $eintrag->store();
+                        } else {
+                            $eintrag->delete();
+                        }
+                    }
                     if (strpos($change, "datafield_") === 0) {
                         $datafield_id = substr($change, strlen("datafield_"));
                         $course_value = DatafieldEntryModel::findOneBySQL("datafield_id = ? AND range_id = ?", array($datafield_id, $user->getId()));
@@ -207,6 +232,12 @@ class UserController extends PluginController
         if (Request::submitted("search") || Request::get("reset-search")) {
             $GLOBALS['user']->cfg->store('ADMIN_USER_SEARCHTEXT', Request::get("search"));
         }
+        $this->redirect("user/overview");
+    }
+
+    public function search_institute_action()
+    {
+        $GLOBALS['user']->cfg->store('ADMIN_USER_INSTITUTE', Request::get("institut_id"));
         $this->redirect("user/overview");
     }
 

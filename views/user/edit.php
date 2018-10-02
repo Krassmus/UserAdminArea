@@ -1,14 +1,14 @@
 <style>
-    .bulkedit tbody tr {
+    .bulkedit table.default > tbody > tr {
         opacity: 0.5;
     }
-    .bulkedit tbody tr.active {
+    .bulkedit table.default > tbody tr.active {
         opacity: 1;
     }
     .bulkedit .entsperren_hinweis {
         display: none;
     }
-    .bulkedit tbody tr.active input:not(:checked) + .entsperren_hinweis {
+    .bulkedit table.default > tbody > tr.active input:not(:checked) + .entsperren_hinweis {
         display: block;
     }
 </style>
@@ -240,6 +240,58 @@
                     </td>
                 </tr>
             <? endif ?>
+            <tr>
+                <td>
+                    <label>
+                        <input type="checkbox" name="change[]" value="studiengang" onChange="jQuery(this).closest('tr').toggleClass('active');">
+                        <?= _("Studiengang bearbeiten") ?>
+                    </label>
+                </td>
+                <td>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td><?= _("Studiengang") ?></td>
+                                <td>
+                                    <select name="studiengang_studiengang_id"
+                                            onChange="jQuery(this).closest('table').closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked');">
+                                        <option value=""></option>
+                                        <? foreach (StudyCourse::findBySQL("1 = 1 ORDER BY name ASC") as $studiengang) : ?>
+                                            <option value="<?= htmlReady($studiengang->getId()) ?>">
+                                                <?= htmlReady($studiengang['name']) ?>
+                                            </option>
+                                        <? endforeach ?>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><?= _("Abschluss") ?></td>
+                                <td>
+                                    <select name="studiengang_abschluss_id"
+                                            onChange="jQuery(this).closest('table').closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked');">
+                                        <option value=""></option>
+                                        <? foreach (Degree::findBySQL("1 = 1 ORDER BY name ASC") as $abschluss) : ?>
+                                            <option value="<?= htmlReady($abschluss->getId()) ?>">
+                                                <?= htmlReady($abschluss['name']) ?>
+                                            </option>
+                                        <? endforeach ?>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><?= _("Semester") ?></td>
+                                <td>
+                                    <input type="number"
+                                           name="studiengang_semester"
+                                           value="1"
+                                           min="0"
+                                           onChange="jQuery(this).closest('table').closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked');">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
             <? foreach ($datafields as $datafield) : ?>
                 <tr>
                     <td>

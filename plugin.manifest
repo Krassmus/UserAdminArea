@@ -1,6 +1,6 @@
 pluginname=UserAdminArea
 pluginclassname=UserAdminArea
-version=1.2
+version=1.4
 origin=data-quest
 studipMinVersion=3.4
 studipMaxVersion=3.5.99
