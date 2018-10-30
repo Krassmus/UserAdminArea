@@ -53,11 +53,28 @@ class UserController extends PluginController
         if ($GLOBALS['user']->cfg->ADMIN_USER_NEVER_ONLINE) {
             $query->where("never_online", "auth_user_md5.user_id NOT IN (SELECT user_id FROM user_online)");
         }
+        if ($GLOBALS['user']->cfg->ADMIN_USER_DOMAIN) {
+            if ($GLOBALS['user']->cfg->ADMIN_USER_DOMAIN === "USER_ADMIN_AREA_NULLDOMAIN") {
+                $query->join("user_userdomains", "user_userdomains.user_id = auth_user_md5.user_id", "LEFT JOIN");
+                $query->where("user_userdomains", "user_userdomains.userdomain_id IS NULL ");
+            } else {
+                $query->join("user_userdomains", "user_userdomains.user_id = auth_user_md5.user_id", "INNER JOIN");
+                $query->where("user_userdomains", "user_userdomains.userdomain_id = :domain ", array('domain' => $GLOBALS['user']->cfg->ADMIN_USER_DOMAIN));
+            }
+        }
         if ($query->count() <= 500) {
             $this->users = $query->fetchAll("User");
         } else {
             PageLayout::postInfo(_("Geben Sie mehr Filter ein."));
         }
+
+        $statement = DBManager::get()->prepare("
+            SELECT user_id, last_lifesign 
+            FROM user_online
+            WHERE user_id IN (:user_ids)
+        ");
+        $statement->execute(array('user_ids' => array_map(function ($u) { return $u->getId(); }, $this->users)));
+        $this->user_lastlifesign = $statement->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
     }
 
     public function edit_action()
@@ -245,6 +262,14 @@ class UserController extends PluginController
     {
         if (Request::isPost()) {
             $GLOBALS['user']->cfg->store('ADMIN_USER_LOCKED', Request::get("locked"));
+        }
+        $this->redirect("user/overview");
+    }
+
+    public function search_userdomain_action()
+    {
+        if (Request::isPost()) {
+            $GLOBALS['user']->cfg->store('ADMIN_USER_DOMAIN', Request::get("domain_id"));
         }
         $this->redirect("user/overview");
     }

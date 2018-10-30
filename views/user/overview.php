@@ -9,14 +9,16 @@
             </caption>
             <thead>
                 <tr>
-                    <th></th>
+                    <th style="max-width: 100px;"></th>
                     <th><?= _("Name") ?></th>
-                    <th>
+                    <th><?= _("Status") ?></th>
+                    <th><?= _("Zuletzt online") ?></th>
+                    <th class="actions">
                         <input type="checkbox" data-proxyfor=":checkbox[name^=u]">
                     </th>
                 </tr>
                 <tr>
-                    <th colspan="100" style="text-align: right">
+                    <th colspan="100" class="actions">
                         <?= \Studip\Button::create(_("Bearbeiten")) ?>
                     </th>
                 </tr>
@@ -25,14 +27,30 @@
                 <? foreach ($users as $user) : ?>
                     <tr>
                         <td>
-                            <?= Avatar::getAvatar($user->getId())->getImageTag(Avatar::MEDIUM, array("style" => "max-width: 50px; max-height: 50px;")) ?>
+                            <a href="<?= Avatar::getAvatar($user->getId())->getURL(Avatar::NORMAL) ?>">
+                                <?= Avatar::getAvatar($user->getId())->getImageTag(Avatar::MEDIUM, array("style" => "max-width: 50px; max-height: 50px;")) ?>
+                            </a>
                         </td>
                         <td>
                             <a href="<?= URLHelper::getLink("dispatch.php/admin/user/edit/".$user->getId()) ?>">
                                 <?= htmlReady($user->getFullName()) ?>
                             </a>
                         </td>
+                        <td><?= htmlReady($user['perms']) ?></td>
                         <td>
+                            <? if (isset($user_lastlifesign[$user->getId()])) :
+                                $inactive = time() - $user_lastlifesign[$user->getId()][0];
+                                if ($inactive < 3600 * 24) {
+                                    $inactive = gmdate('H:i:s', $inactive);
+                                } else {
+                                    $inactive = floor($inactive / (3600 * 24)).' '._('Tage');
+                                }
+                            else :
+                                $inactive = _("nie benutzt");
+                            endif ?>
+                            <?= $inactive ?>
+                        </td>
+                        <td class="actions">
                             <input type="checkbox" name="u[]" value="<?= htmlReady($user->getId()) ?>">
                         </td>
                     </tr>
@@ -47,6 +65,8 @@
             </tfoot>
         </table>
     </form>
+<? else : ?>
+    <?= MessageBox::info(_("Keine Personen zu den angegebenen Filterkriterien gefunden.")) ?>
 <? endif ?>
 
 <?
@@ -125,6 +145,25 @@ foreach (RolePersistence::getAllRoles() as $role) {
     }
 }
 Sidebar::get()->addWidget($status_select);
+
+$locked = new SelectWidget(
+    _("Domänen-Filter"),
+    PluginEngine::getURL($plugin, array(), "user/search_userdomain"),
+    "domain_id",
+    "post"
+);
+$domains = array(
+    '' => "",
+    'USER_ADMIN_AREA_NULLDOMAIN' => "Null-Domäne"
+);
+foreach (UserDomain::getUserDomains() as $domain) {
+    $domains[$domain->getID()] = $domain->getName();
+}
+$locked->setOptions(
+    $domains,
+    $GLOBALS['user']->cfg->ADMIN_USER_DOMAIN
+);
+Sidebar::Get()->addWidget($locked);
 
 $inactivity = new SearchWidget(PluginEngine::getURL($plugin, array(), "user/search_inactivity"));
 $inactivity->setTitle(_("Inaktiv seit Tagen"));
