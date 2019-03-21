@@ -147,14 +147,14 @@ foreach (RolePersistence::getAllRoles() as $role) {
 Sidebar::get()->addWidget($status_select);
 
 $locked = new SelectWidget(
-    _("Domänen-Filter"),
+    _("DomÃ¤nen-Filter"),
     PluginEngine::getURL($plugin, array(), "user/search_userdomain"),
     "domain_id",
     "post"
 );
 $domains = array(
     '' => "",
-    'USER_ADMIN_AREA_NULLDOMAIN' => "Null-Domäne"
+    'USER_ADMIN_AREA_NULLDOMAIN' => "Null-DomÃ¤ne"
 );
 foreach (UserDomain::getUserDomains() as $domain) {
     $domains[$domain->getID()] = $domain->getName();

@@ -30,7 +30,7 @@
         <thead>
             <tr>
                 <th width="50%">
-                    <?= _("Zu verändernde Eigenschaft") ?>
+                    <?= _("Zu verÃ¤ndernde Eigenschaft") ?>
                 </th>
                 <th width="50%"><?= _("Neuen Wert festlegen") ?></th>
             </tr>
@@ -98,7 +98,7 @@
                 <td>
                     <label>
                         <input type="checkbox" name="change[]" value="add_institut_id" onChange="jQuery(this).closest('tr').toggleClass('active');">
-                        <?= _("Einrichtung hinzufügen") ?>
+                        <?= _("Einrichtung hinzufÃ¼gen") ?>
                     </label>
                 </td>
                 <td>
@@ -205,7 +205,7 @@
                     <td>
                         <label>
                             <input type="checkbox" name="change[]" value="add_userdomain" onChange="jQuery(this).closest('tr').toggleClass('active');">
-                            <?= _("Nutzerdomäne hinzufügen") ?>
+                            <?= _("NutzerdomÃ¤ne hinzufÃ¼gen") ?>
                         </label>
                     </td>
                     <td>
@@ -224,7 +224,7 @@
                     <td>
                         <label>
                             <input type="checkbox" name="change[]" value="remove_userdomain" onChange="jQuery(this).closest('tr').toggleClass('active');">
-                            <?= _("Nutzerdomäne entfernen") ?>
+                            <?= _("NutzerdomÃ¤ne entfernen") ?>
                         </label>
                     </td>
                     <td>
@@ -342,6 +342,6 @@
 
     <div data-dialog-button>
         <?= \Studip\Button::create(_("Speichern"), "save") ?>
-        <?= \Studip\Button::create(_("Alle löschen"), "delete", array('formaction' => PluginEngine::getURL($plugin, array(), "user/delete_all"), 'onClick' => "return window.confirm('"._("Wirklich alle diese Nutzer löschen?")."');")) ?>
+        <?= \Studip\Button::create(_("Alle lÃ¶schen"), "delete", array('formaction' => PluginEngine::getURL($plugin, array(), "user/delete_all"), 'onClick' => "return window.confirm('"._("Wirklich alle diese Nutzer lÃ¶schen?")."');")) ?>
     </div>
 </form>
