@@ -104,6 +104,68 @@ foreach (Institute::getMyInstitutes($GLOBALS['user']->id) as $institut) {
 Sidebar::Get()->addWidget($institute);
 
 
+$faecher = new SelectWidget(
+    _("Fächer"),
+    PluginEngine::getURL($plugin, array(), "user/search_fach"),
+    "fach_id",
+    "post"
+);
+$faecher->setOptions(
+    array('' => "")
+);
+foreach (Fach::getAllEnriched() as $fach) {
+    $faecher->addElement(
+        new SelectElement(
+            $fach->getId(),
+            $fach['Name'],
+            $GLOBALS['user']->cfg->ADMIN_USER_FACH === $fach->getId()
+        ),
+        'select-' . $fach->getId()
+    );
+}
+Sidebar::Get()->addWidget($faecher);
+$abschluesse = new SelectWidget(
+    _("Abschlüsse"),
+    PluginEngine::getURL($plugin, array(), "user/search_abschluss"),
+    "abschluss_id",
+    "post"
+);
+$abschluesse->setOptions(
+    array('' => "")
+);
+foreach (Abschluss::getAllEnriched() as $abschluss) {
+    $abschluesse->addElement(
+        new SelectElement(
+            $abschluss->getId(),
+            $abschluss['Name'],
+            $GLOBALS['user']->cfg->ADMIN_USER_ABSCHLUSS === $abschluss->getId()
+        ),
+        'select-' . $abschluss->getId()
+    );
+}
+Sidebar::Get()->addWidget($abschluesse);
+$fachsemester = new SelectWidget(
+    _("Fachsemester"),
+    PluginEngine::getURL($plugin, array(), "user/search_fachsemester"),
+    "fachsemester",
+    "post"
+);
+$fachsemester->setOptions(
+    array('' => "")
+);
+for ($i = 1; $i < 50; $i++) {
+    $fachsemester->addElement(
+        new SelectElement(
+            $i,
+            $i,
+            $GLOBALS['user']->cfg->ADMIN_USER_FACHSEMESTER == $i
+        ),
+        'select-' . $i
+    );
+}
+Sidebar::Get()->addWidget($fachsemester);
+
+
 $locked = new SelectWidget(
     _("Sperr-Filter"),
     PluginEngine::getURL($plugin, array(), "user/search_locked"),
@@ -188,7 +250,7 @@ Sidebar::get()->addWidget($status_select);
 
 $actions = new ActionsWidget();
 $actions->addLink(
-    _("Alle Nutzer bearbeiten"),
+    _("ALLE Nutzer bearbeiten"),
     PluginEngine::getURL($plugin, array('all' => 1), "user/edit"),
     Icon::create("edit"),
     array('data-dialog' => 1)

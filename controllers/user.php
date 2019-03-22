@@ -24,6 +24,24 @@ class UserController extends PluginController
                 'institut_id' => $GLOBALS['user']->cfg->ADMIN_USER_INSTITUTE
             ));
         }
+        if($GLOBALS['user']->cfg->ADMIN_USER_FACH) {
+            $query->join("user_studiengang", "user_studiengang.user_id = auth_user_md5.user_id", "INNER JOIN");
+            $query->where("fach_id","user_studiengang.fach_id = :fach_id", array(
+                'fach_id' => $GLOBALS['user']->cfg->ADMIN_USER_FACH
+            ));
+        }
+        if($GLOBALS['user']->cfg->ADMIN_USER_ABSCHLUSS) {
+            $query->join("user_studiengang", "user_studiengang.user_id = auth_user_md5.user_id", "INNER JOIN");
+            $query->where("abschluss_id","user_studiengang.abschluss_id = :abschluss_id", array(
+                'abschluss_id' => $GLOBALS['user']->cfg->ADMIN_USER_ABSCHLUSS
+            ));
+        }
+        if ($GLOBALS['user']->cfg->ADMIN_USER_FACHSEMESTER) {
+            $query->join("user_studiengang", "user_studiengang.user_id = auth_user_md5.user_id", "INNER JOIN");
+            $query->where("fachsemester","user_studiengang.semester = :fachsemester", array(
+                'fachsemester' => $GLOBALS['user']->cfg->ADMIN_USER_FACHSEMESTER
+            ));
+        }
         if ($GLOBALS['user']->cfg->ADMIN_USER_LOCKED) {
             $query->where("locked","auth_user_md5.locked = :locked", array(
                 'locked' => $GLOBALS['user']->cfg->ADMIN_USER_LOCKED === "locked" ? 1 : 0
@@ -255,6 +273,24 @@ class UserController extends PluginController
     public function search_institute_action()
     {
         $GLOBALS['user']->cfg->store('ADMIN_USER_INSTITUTE', Request::get("institut_id"));
+        $this->redirect("user/overview");
+    }
+
+    public function search_fach_action()
+    {
+        $GLOBALS['user']->cfg->store('ADMIN_USER_FACH', Request::get("fach_id"));
+        $this->redirect("user/overview");
+    }
+
+    public function search_abschluss_action()
+    {
+        $GLOBALS['user']->cfg->store('ADMIN_USER_ABSCHLUSS', Request::get("abschluss_id"));
+        $this->redirect("user/overview");
+    }
+
+    public function search_fachsemester_action()
+    {
+        $GLOBALS['user']->cfg->store('ADMIN_USER_FACHSEMESTER', Request::get("fachsemester"));
         $this->redirect("user/overview");
     }
 
