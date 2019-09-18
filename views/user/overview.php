@@ -248,11 +248,44 @@ $status_select->addCheckbox(
 );
 Sidebar::get()->addWidget($status_select);
 
+foreach (DataField::getDataFields("user") as $datafield) {
+    if ($datafield['type'] === "bool") {
+        $datafield_widget = new SelectWidget(
+            sprintf(_("%s-Filter"), $datafield['name']),
+            PluginEngine::getURL($plugin, array(), "user/search_datafield"),
+            "datafield_".$datafield->getId(),
+            "post"
+        );
+        $options = array(
+            '' => "",
+            'yes' => _("Ja"),
+            'no' =>  _("Nein")
+        );
+        $datafield_widget->setOptions(
+            $options,
+            $GLOBALS['user']->cfg->getValue("ADMIN_USER_DATAFIELD_".$datafield->getId()) ? "yes" : ($GLOBALS['user']->cfg->getValue("ADMIN_USER_DATAFIELD_".$datafield->getId()) === "0" ? "no" : false)
+        );
+        Sidebar::Get()->addWidget($datafield_widget);
+    } else {
+        $search = new SearchWidget(PluginEngine::getURL($plugin, array('df' => $datafield->getId()), "user/search_datafield"));
+        $search->addNeedle(
+            sprintf(_("%s-Filter"), $datafield['name']),
+            "datafield_".$datafield->getId(),
+            true,
+            null,
+            null,
+            $GLOBALS['user']->cfg->getValue("ADMIN_USER_DATAFIELD_".$datafield->getId())
+        );
+        Sidebar::Get()->addWidget($search);
+    }
+}
+
+
 $actions = new ActionsWidget();
 $actions->addLink(
     _("ALLE Nutzer bearbeiten"),
     PluginEngine::getURL($plugin, array('all' => 1), "user/edit"),
     Icon::create("edit"),
-    array('data-dialog' => 1)
+    array('data-dialog' => 1, 'data-confirm' => _("Wirklich ALLE Nutzer des Systems bearbeiten?"))
 );
 Sidebar::Get()->addWidget($actions);

@@ -97,6 +97,28 @@
             <tr>
                 <td>
                     <label>
+                        <input type="checkbox" name="change[]" value="add_seminar_id" onChange="jQuery(this).closest('tr').toggleClass('active');">
+                        <?= _("Veranstaltung hinzufügen") ?>
+                    </label>
+                </td>
+                <td>
+                    <?= QuickSearch::get("add_seminar_id", new SeminarSearch())->setAttributes(array('onChange' => "jQuery(this).closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked');"))->render() ?>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>
+                        <input type="checkbox" name="change[]" value="remove_seminar_id" onChange="jQuery(this).closest('tr').toggleClass('active');">
+                        <?= _("veranstaltung entfernen") ?>
+                    </label>
+                </td>
+                <td>
+                    <?= QuickSearch::get("remove_seminar_id", new SeminarSearch())->setAttributes(array('onChange' => "jQuery(this).closest('tr').addClass('active').find('td:first-child :checkbox').prop('checked', 'checked');"))->render() ?>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>
                         <input type="checkbox" name="change[]" value="add_institut_id" onChange="jQuery(this).closest('tr').toggleClass('active');">
                         <?= _("Einrichtung hinzufügen") ?>
                     </label>

@@ -80,6 +80,21 @@ class UserController extends PluginController
                 $query->where("user_userdomains", "user_userdomains.userdomain_id = :domain ", array('domain' => $GLOBALS['user']->cfg->ADMIN_USER_DOMAIN));
             }
         }
+        foreach (DataField::getDataFields("user") as $datafield) {
+            if (($GLOBALS['user']->cfg->getValue("ADMIN_USER_DATAFIELD_".$datafield->getId()) !== null) && ($GLOBALS['user']->cfg->getValue("ADMIN_USER_DATAFIELD_".$datafield->getId()) !== '')) {
+                $value = $GLOBALS['user']->cfg->getValue("ADMIN_USER_DATAFIELD_".$datafield->getId());
+                $query->join("de", "datafields_entries", "de.range_id = auth_user_md5.user_id", "LEFT JOIN");
+                $query->where(
+                    "datafields_entries_".$datafield->getId(),
+                    "(de.`content` = :datafield_".$datafield->getId()."_content AND de.datafield_id = :datafield_".$datafield->getId()."_id)",
+                    array(
+                        'datafield_'.$datafield->getId().'_content' => $value,
+                        'datafield_'.$datafield->getId().'_id'      => $datafield->getId()
+                    )
+                );
+            }
+        }
+
         if ($query->count() <= 500) {
             $this->users = $query->fetchAll("User");
         } else {
@@ -158,6 +173,22 @@ class UserController extends PluginController
                             $member->delete();
                         }
                     }
+                    if ($change === "add_seminar_id" && Request::option("add_seminar_id") && $GLOBALS['perm']->have_perm("admin")) {
+                        $member = CourseMember::findOneBySQL("user_id = ? AND Seminar_id = ?", array($user->getId(), Request::option("add_seminar_id")));
+                        if (!$member) {
+                            $member = new CourseMember();
+                            $member['user_id'] = $user->getId();
+                            $member['seminar_id'] = Request::option("add_seminar_id");
+                            $member['status'] = "autor";
+                            $member->store();
+                        }
+                    }
+                    if ($change === "remove_seminar_id" && Request::option("remove_seminar_id") && $GLOBALS['perm']->have_perm("admin")) {
+                        $member = CourseMember::findOneBySQL("user_id = ? AND Seminar_id = ?", array($user->getId(), Request::option("remove_seminar_id")));
+                        if ($member) {
+                            $member->delete();
+                        }
+                    }
                     if ($change === "visible" && Request::get("visible")) {
                         $user['visible'] = Request::get("visible");
                     }
@@ -228,6 +259,9 @@ class UserController extends PluginController
                             $course_value['range_id'] = $user->getId();
                             $course_value['datafield_id'] = $datafield_id;
                             $course_value['sec_range_id'] = '';
+                            if (StudipVersion::newerThan("4.1")) {
+                                $course_value['lang'] = '';
+                            }
                         }
                         $course_value->content = Request::get("datafield_" . $datafield_id, '');
                         $course_value->store();
@@ -331,6 +365,26 @@ class UserController extends PluginController
     {
         if (Request::submitted("inactivity") || Request::get("reset-search")) {
             $GLOBALS['user']->cfg->store('ADMIN_USER_INACTIVITY', Request::get("inactivity"));
+        }
+        $this->redirect("user/overview");
+    }
+
+    public function search_datafield_action()
+    {
+        foreach (DataField::getDataFields("user") as $datafield) {
+            if (in_array("datafield_".$datafield->getId(), array_keys($_REQUEST))) {
+                if (Request::get("datafield_".$datafield->getId()) === "") {
+                    $GLOBALS['user']->cfg->delete('ADMIN_USER_DATAFIELD_'.$datafield->getId());
+                } else {
+                    $value = $datafield['type'] === "bool"
+                        ? (Request::get("datafield_" . $datafield->getId()) === "yes" ? '1' : '0')
+                        : Request::get("datafield_" . $datafield->getId());
+                    $GLOBALS['user']->cfg->store('ADMIN_USER_DATAFIELD_'.$datafield->getId(), $value);
+                }
+            }
+        }
+        if (Request::submitted("reset-search")) {
+            $GLOBALS['user']->cfg->delete('ADMIN_USER_DATAFIELD_'.Request::get("df"));
         }
         $this->redirect("user/overview");
     }
