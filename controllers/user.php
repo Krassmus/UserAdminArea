@@ -94,11 +94,15 @@ class UserController extends PluginController
                 );
             }
         }
+        $countUsers = $query->count();
 
-        if ($query->count() <= 500) {
+        if ($countUsers <= 500 || Request::get("show_all")) {
             $this->users = $query->fetchAll("User");
+            if (count($this->users) === 0) {
+                PageLayout::postMessage(MessageBox::info(_("Keine Personen zu den angegebenen Filterkriterien gefunden.")));
+            }
         } else {
-            PageLayout::postInfo(_("Geben Sie mehr Filter ein."));
+            PageLayout::postInfo(sprintf(_("%s Nutzer gefunden. Geben Sie mehr Filter ein, oder %salle anzeigen%s."), $countUsers, '<a href="'.PluginEngine::getLink($this->plugin, array('show_all' => 1), "user/overview").'">', '</a>'));
         }
 
         $statement = DBManager::get()->prepare("
@@ -106,7 +110,9 @@ class UserController extends PluginController
             FROM user_online
             WHERE user_id IN (:user_ids)
         ");
-        $statement->execute(array('user_ids' => array_map(function ($u) { return $u->getId(); }, $this->users)));
+        $statement->execute(array(
+            'user_ids' => array_map(function ($u) { return $u->getId(); }, (array) $this->users)
+        ));
         $this->user_lastlifesign = $statement->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
     }
 

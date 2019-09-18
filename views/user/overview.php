@@ -65,8 +65,6 @@
             </tfoot>
         </table>
     </form>
-<? else : ?>
-    <?= MessageBox::info(_("Keine Personen zu den angegebenen Filterkriterien gefunden.")) ?>
 <? endif ?>
 
 <?

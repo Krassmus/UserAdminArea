@@ -144,7 +144,7 @@ class SQLQuery {
     public function count()
     {
         \NotificationCenter::postNotification("SQLQueryWillExecute", $this);
-        $sql = "SELECT COUNT(DISTINCT ".implode(", ", $this->getPrimaryKey()).") ".$this->getQuery();
+        $sql = "SELECT COUNT(*) FROM (SELECT * ".$this->getQuery().") AS counter_table";
 
         $statement = \DBManager::get()->prepare($sql);
         $statement->execute((array) $this->settings['parameter']);
