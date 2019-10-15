@@ -144,10 +144,11 @@ class SQLQuery {
     public function count()
     {
         \NotificationCenter::postNotification("SQLQueryWillExecute", $this);
-        $sql = "SELECT COUNT(*) FROM (SELECT * ".$this->getQuery().") AS counter_table";
+        $sql = "SELECT COUNT(*) FROM (SELECT `".$this->settings['table']."`.* ".$this->getQuery().") AS counter_table";
 
         $statement = \DBManager::get()->prepare($sql);
         $statement->execute((array) $this->settings['parameter']);
+
         return (int) $statement->fetch(\PDO::FETCH_COLUMN, 0);
     }
 

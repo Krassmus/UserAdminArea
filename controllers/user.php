@@ -94,6 +94,7 @@ class UserController extends PluginController
                 );
             }
         }
+
         $countUsers = $query->count();
 
         if ($countUsers <= 500 || Request::get("show_all")) {
@@ -104,6 +105,7 @@ class UserController extends PluginController
         } else {
             PageLayout::postInfo(sprintf(_("%s Nutzer gefunden. Geben Sie mehr Filter ein, oder %salle anzeigen%s."), $countUsers, '<a href="'.PluginEngine::getLink($this->plugin, array('show_all' => 1), "user/overview").'">', '</a>'));
         }
+
 
         $statement = DBManager::get()->prepare("
             SELECT user_id, last_lifesign 
