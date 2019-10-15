@@ -109,7 +109,7 @@
                 <td>
                     <label>
                         <input type="checkbox" name="change[]" value="remove_seminar_id" onChange="jQuery(this).closest('tr').toggleClass('active');">
-                        <?= _("veranstaltung entfernen") ?>
+                        <?= _("Veranstaltung entfernen") ?>
                     </label>
                 </td>
                 <td>

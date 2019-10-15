@@ -266,8 +266,9 @@ foreach (DataField::getDataFields("user") as $datafield) {
         Sidebar::Get()->addWidget($datafield_widget);
     } else {
         $search = new SearchWidget(PluginEngine::getURL($plugin, array('df' => $datafield->getId()), "user/search_datafield"));
+        $search->setTitle(sprintf(_("%s-Filter"), $datafield['name']));
         $search->addNeedle(
-            sprintf(_("%s-Filter"), $datafield['name']),
+            $datafield['name'],
             "datafield_".$datafield->getId(),
             true,
             null,
