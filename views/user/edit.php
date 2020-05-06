@@ -236,7 +236,7 @@
                             <option value=""></option>
                             <? foreach (UserDomain::getUserDomains() as $domain) : ?>
                                 <option value="<?= htmlReady($domain->getID()) ?>">
-                                    <?= htmlReady($domain->getName()) ?>
+                                    <?= htmlReady($domain['name']) ?>
                                 </option>
                             <? endforeach ?>
                         </select>
@@ -255,7 +255,7 @@
                             <option value=""></option>
                             <? foreach (UserDomain::getUserDomains() as $domain) : ?>
                                 <option value="<?= htmlReady($domain->getID()) ?>">
-                                    <?= htmlReady($domain->getName()) ?>
+                                    <?= htmlReady($domain['name']) ?>
                                 </option>
                             <? endforeach ?>
                         </select>

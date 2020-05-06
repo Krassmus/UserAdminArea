@@ -217,7 +217,7 @@ $domains = array(
     'USER_ADMIN_AREA_NULLDOMAIN' => "Null-Domäne"
 );
 foreach (UserDomain::getUserDomains() as $domain) {
-    $domains[$domain->getID()] = $domain->getName();
+    $domains[$domain->getID()] = $domain['name'];
 }
 $locked->setOptions(
     $domains,
