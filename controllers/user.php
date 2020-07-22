@@ -108,7 +108,7 @@ class UserController extends PluginController
 
 
         $statement = DBManager::get()->prepare("
-            SELECT user_id, last_lifesign 
+            SELECT user_id, last_lifesign
             FROM user_online
             WHERE user_id IN (:user_ids)
         ");
@@ -228,7 +228,7 @@ class UserController extends PluginController
                             }
                             if ($subject && $mailbody) {
                                 StudipMail::sendMessage($user['email'], $subject, $mailbody);
-                                log_event("USER_NEWPWD", $user->getId());
+                                StudipLog::log("USER_NEWPWD", $user->getId());
                             }
                         }
                     }
