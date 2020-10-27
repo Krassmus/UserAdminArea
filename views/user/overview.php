@@ -86,8 +86,13 @@ $institute = new SelectWidget(
     "institut_id",
     "post"
 );
-$institute->setOptions(
-    array('' => "")
+$institute->addElement(
+    new SelectElement(
+        '',
+        '',
+        !$GLOBALS['user']->cfg->ADMIN_USER_INSTITUTE
+    ),
+    'select-institut'
 );
 foreach (Institute::getMyInstitutes($GLOBALS['user']->id) as $institut) {
     $institute->addElement(
@@ -108,8 +113,13 @@ $faecher = new SelectWidget(
     "fach_id",
     "post"
 );
-$faecher->setOptions(
-    array('' => "")
+$faecher->addElement(
+    new SelectElement(
+        '',
+        '',
+        !$GLOBALS['user']->cfg->ADMIN_USER_FACH
+    ),
+    'select-fach'
 );
 foreach (Fach::getAllEnriched() as $fach) {
     $faecher->addElement(
@@ -128,8 +138,13 @@ $abschluesse = new SelectWidget(
     "abschluss_id",
     "post"
 );
-$abschluesse->setOptions(
-    array('' => "")
+$abschluesse->addElement(
+    new SelectElement(
+        '',
+        '',
+        !$GLOBALS['user']->cfg->ADMIN_USER_ABSCHLUSS
+    ),
+    'select-abschluss'
 );
 foreach (Abschluss::getAllEnriched() as $abschluss) {
     $abschluesse->addElement(
@@ -148,8 +163,13 @@ $fachsemester = new SelectWidget(
     "fachsemester",
     "post"
 );
-$fachsemester->setOptions(
-    array('' => "")
+$fachsemester->addElement(
+    new SelectElement(
+        '',
+        '',
+        !$GLOBALS['user']->cfg->ADMIN_USER_FACHSEMESTER
+    ),
+    'select-semester'
 );
 for ($i = 1; $i < 50; $i++) {
     $fachsemester->addElement(
