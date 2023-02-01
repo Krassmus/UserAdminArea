@@ -1,4 +1,4 @@
-<? if (count($users)) : ?>
+<? if ($users && count($users)) : ?>
     <form action="<?= PluginEngine::getLink($plugin, array(), "user/edit") ?>"
           method="post"
           data-dialog>
