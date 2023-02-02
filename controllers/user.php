@@ -43,9 +43,25 @@ class UserController extends PluginController
             ));
         }
         if ($GLOBALS['user']->cfg->ADMIN_USER_LOCKED) {
-            $query->where("locked","auth_user_md5.locked = :locked", array(
-                'locked' => $GLOBALS['user']->cfg->ADMIN_USER_LOCKED === "locked" ? 1 : 0
-            ));
+            if (in_array($GLOBALS['user']->cfg->ADMIN_USER_LOCKED, ['locked', 'unlocked'])) {
+                $query->where("locked", "auth_user_md5.locked = :locked", array(
+                    'locked' => $GLOBALS['user']->cfg->ADMIN_USER_LOCKED === "locked" ? 1 : 0
+                ));
+            }
+            if (in_array($GLOBALS['user']->cfg->ADMIN_USER_LOCKED, ['expired', 'locked_and_expired'])) {
+                $query->join(
+                    'expire_date',
+                    'config_values', "`expire_date`.`range_id` = `auth_user_md5`.`user_id` AND `expire_date`.`field` = 'EXPIRATION_DATE'",
+                    'LEFT JOIN'
+                );
+                if ($GLOBALS['user']->cfg->ADMIN_USER_LOCKED === 'expired') {
+                    $query->where("expired", "`expire_date`.`value` < UNIX_TIMESTAMP()");
+                } else {
+                    $query->where("expired", "(`expire_date`.`value` < UNIX_TIMESTAMP()) OR (auth_user_md5.locked = :locked)", array(
+                        'locked' => 1
+                    ));
+                }
+            }
         }
         $status_config = $config = $GLOBALS['user']->cfg->ADMIN_USER_STATUS ? unserialize($GLOBALS['user']->cfg->ADMIN_USER_STATUS) : array();
         if (count($status_config)) {

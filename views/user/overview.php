@@ -174,7 +174,9 @@ $locked->setOptions(
     array(
         '' => "",
         'locked' => _("Gesperrte Nutzer"),
-        'unlocked' => _("Ungesperrte Nutzer")
+        'unlocked' => _("Ungesperrte Nutzer"),
+        'locked_and_expired' => _("Gesperrte und abgelaufene Nutzer"),
+        'expired' => _('Abglaufene Nutzer')
     ),
     $GLOBALS['user']->cfg->ADMIN_USER_LOCKED
 );
