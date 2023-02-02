@@ -330,7 +330,11 @@ class UserController extends PluginController
 
     public function search_institute_action()
     {
-        $GLOBALS['user']->cfg->store('ADMIN_USER_INSTITUTE', Request::get("institut_id"));
+        if (Request::get("institut_id") && Request::get("institut_id") !== 'all') {
+            $GLOBALS['user']->cfg->store('ADMIN_USER_INSTITUTE', Request::get("institut_id"));
+        } else {
+            $GLOBALS['user']->cfg->delete('ADMIN_USER_INSTITUTE');
+        }
         $this->redirect("user/overview");
     }
 

@@ -87,7 +87,7 @@ $institute = new SelectWidget(
     "post"
 );
 $institute->setOptions(
-    array('' => "")
+    array('all' => "-")
 );
 foreach (Institute::getMyInstitutes($GLOBALS['user']->id) as $institut) {
     $institute->addElement(
