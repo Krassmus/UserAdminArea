@@ -301,11 +301,6 @@ class UserController extends PluginController
             PageLayout::postMessage(MessageBox::success(sprintf(_("%s Personen erfolgreich gespeichert"), count($this->users))));
         }
 
-        $this->available_auth_plugins = [];
-        foreach ($GLOBALS['STUDIP_AUTH_PLUGIN'] as $ap) {
-            $this->available_auth_plugins[mb_strtolower($ap)] = $ap;
-        }
-
         PageLayout::setTitle(sprintf(_("%s Nutzer bearbeiten"), $count));
     }
 
