@@ -208,6 +208,26 @@ foreach (RolePersistence::getAllRoles() as $role) {
 }
 Sidebar::get()->addWidget($status_select);
 
+$auth_filter = new SelectWidget(
+    _("Authentifizierungsfilter"),
+    PluginEngine::getURL($plugin, array(), "user/search_auth"),
+    "auth_plugin",
+    "post"
+);
+$auth_plugins = array(
+    '' => ""
+);
+foreach ($GLOBALS['STUDIP_AUTH_PLUGIN'] as $ap) {
+    $auth_plugins[mb_strtolower($ap)] = $ap;
+}
+if (count($auth_plugins) > 2) {
+    $auth_filter->setOptions(
+        $auth_plugins,
+        $GLOBALS['user']->cfg->ADMIN_USER_AUTH_PLUGIN
+    );
+    Sidebar::Get()->addWidget($auth_filter);
+}
+
 $locked = new SelectWidget(
     _("Domänen-Filter"),
     PluginEngine::getURL($plugin, array(), "user/search_userdomain"),

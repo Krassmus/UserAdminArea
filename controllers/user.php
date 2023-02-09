@@ -63,6 +63,11 @@ class UserController extends PluginController
                 }
             }
         }
+        if ($GLOBALS['user']->cfg->ADMIN_USER_AUTH_PLUGIN) {
+            $query->where("auth_plugin", "`auth_user_md5`.`auth_plugin` = :auth_plugin", [
+                'auth_plugin' => $GLOBALS['user']->cfg->ADMIN_USER_AUTH_PLUGIN
+            ]);
+        }
         $status_config = $config = $GLOBALS['user']->cfg->ADMIN_USER_STATUS ? unserialize($GLOBALS['user']->cfg->ADMIN_USER_STATUS) : array();
         if (count($status_config)) {
             $system_status = array("user", "autor", "tutor", "dozent", "admin", "root");
@@ -296,6 +301,11 @@ class UserController extends PluginController
             PageLayout::postMessage(MessageBox::success(sprintf(_("%s Personen erfolgreich gespeichert"), count($this->users))));
         }
 
+        $this->available_auth_plugins = [];
+        foreach ($GLOBALS['STUDIP_AUTH_PLUGIN'] as $ap) {
+            $this->available_auth_plugins[mb_strtolower($ap)] = $ap;
+        }
+
         PageLayout::setTitle(sprintf(_("%s Nutzer bearbeiten"), $count));
     }
 
@@ -360,6 +370,14 @@ class UserController extends PluginController
     {
         if (Request::isPost()) {
             $GLOBALS['user']->cfg->store('ADMIN_USER_LOCKED', Request::get("locked"));
+        }
+        $this->redirect("user/overview");
+    }
+
+    public function search_auth_action()
+    {
+        if (Request::isPost()) {
+            $GLOBALS['user']->cfg->store('ADMIN_USER_AUTH_PLUGIN', Request::get("auth_plugin"));
         }
         $this->redirect("user/overview");
     }
