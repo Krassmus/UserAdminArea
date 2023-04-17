@@ -26,6 +26,7 @@ class SQLQuery {
 
     public $settings = array();
     public $name = null;
+    protected $statement = null;
 
     static public function table($table, $query_name = null)
     {
@@ -48,9 +49,10 @@ class SQLQuery {
         if (!is_array($select)) {
             $select = $statement ? array($select => $statement) : array($select => "");
         }
-        foreach ($select as $alias => $statement) {
+        foreach ($select as $alias => $select) {
             $this->settings['select'][$alias] = $select;
         }
+        return $this;
     }
 
     /**
@@ -163,7 +165,7 @@ class SQLQuery {
         $sql = "SELECT `".$this->settings['table']."`.* ";
 
         foreach ((array) $this->settings['select'] as $alias => $statement) {
-            $sql .= $statement ? $statement." AS ".$alias." " : $alias;
+            $sql .= ', '. ($statement ? $statement." AS ".$alias." " : $alias);
         }
 
         $sql .= $this->getQuery();
@@ -186,6 +188,42 @@ class SQLQuery {
     }
 
     /**
+     * Fetches the one row of the resultset as an associative array. If you define
+     * a sorm_class the result will be a sorm-objects.
+     * @return array or SORM-object.
+     */
+    public function fetch($sorm_class = null)
+    {
+        if ($this->statement === null) {
+            \NotificationCenter::postNotification("SQLQueryWillExecute", $this);
+            $sql = "SELECT `".$this->settings['table']."`.* ";
+
+            foreach ((array) $this->settings['select'] as $alias => $statement) {
+                $sql .= ', '. ($statement ? $statement." AS ".$alias." " : $alias);
+            }
+
+            $sql .= $this->getQuery();
+
+            $this->statement = \DBManager::get()->prepare($sql);
+            $this->statement->execute((array) $this->settings['parameter']);
+        }
+
+        $data = $this->statement->fetch(\PDO::FETCH_ASSOC);
+        if (!$data) {
+            $this->statement = null;
+            return false;
+        }
+        if (!$sorm_class) {
+            return $data;
+        } else {
+            $object = new $sorm_class();
+            $object->setData($data);
+            $object->setNew(false);
+            return $object;
+        }
+    }
+
+    /**
      * Shows the query that would be executed in the method fetchAll
      * @return string : sql query
      */
@@ -194,7 +232,7 @@ class SQLQuery {
         $sql = "SELECT `".$this->settings['table']."`.* ";
 
         foreach ((array) $this->settings['select'] as $alias => $statement) {
-            $sql .= $statement ? $statement." AS ".$alias." " : $alias;
+            $sql .= ', '. ($statement ? $statement." AS ".$alias." " : $alias);
         }
 
         $sql .= $this->getQuery();

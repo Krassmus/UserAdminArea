@@ -51,7 +51,9 @@
                             <?= $inactive ?>
                         </td>
                         <td class="actions">
-                            <input type="checkbox" name="u[]" value="<?= htmlReady($user->getId()) ?>">
+                            <? if (UserAdminArea::userMayEditUser($user->getId())) : ?>
+                                <input type="checkbox" name="u[]" value="<?= htmlReady($user->getId()) ?>">
+                            <? endif ?>
                         </td>
                     </tr>
                 <? endforeach ?>
@@ -303,10 +305,18 @@ foreach (DataField::getDataFields("user") as $datafield) {
 
 
 $actions = new ActionsWidget();
+if ($GLOBALS['perm']->have_perm('root')) {
+    $actions->addLink(
+        _("ALLE Nutzer bearbeiten"),
+        PluginEngine::getURL($plugin, array('all' => 1), "user/edit"),
+        Icon::create("edit"),
+        array('data-dialog' => 1, 'data-confirm' => _("Wirklich ALLE Nutzer des Systems bearbeiten?"))
+    );
+}
 $actions->addLink(
-    _("ALLE Nutzer bearbeiten"),
-    PluginEngine::getURL($plugin, array('all' => 1), "user/edit"),
-    Icon::create("edit"),
-    array('data-dialog' => 1, 'data-confirm' => _("Wirklich ALLE Nutzer des Systems bearbeiten?"))
+    _('CSV-Export'),
+    PluginEngine::getURL($plugin, array(), "export/select"),
+    Icon::create("export"),
+    array('data-dialog' => 1)
 );
 Sidebar::Get()->addWidget($actions);
