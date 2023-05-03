@@ -27,7 +27,8 @@ class UserAdminArea extends StudIPPlugin implements SystemPlugin
             ->select([
                 'title_front' => 'user_info.title_front',
                 'title_rear' => 'user_info.title_rear',
-                'preferred_language' => 'user_info.preferred_language'
+                'preferred_language' => 'user_info.preferred_language',
+                'geschlecht' => 'user_info.geschlecht'
             ])
             ->groupBy("auth_user_md5.user_id")
             ->orderBy('auth_user_md5.Nachname , auth_user_md5.Vorname ASC');

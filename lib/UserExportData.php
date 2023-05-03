@@ -27,6 +27,7 @@ class UserExportData
             'gender' => _('Geschlecht'),
             'visible' => _('Sichtbarkeit'),
             'userdomains' => _('Nutzerdomänen'),
+            'userdomain_ids' => _('Nutzerdomänen-IDs'),
             'roles' => _('Rollen'),
             'studycourses' => _('Studiengänge'),
             'institutes' => _('Einrichtungen')
@@ -119,23 +120,27 @@ class UserExportData
                     $statement->execute(array(
                         'user_id' => $user['user_id']
                     ));
-                    $data['last_activity'] = $statement->fetchAll(\PDO::FETCH_COLUMN);
+                    $data['last_activity'] = $statement->fetch(\PDO::FETCH_COLUMN, 0);
+                    $data['last_activity'] = $data['last_activity']
+                        ? date('c', $data['last_activity'])
+                        : '';
                 case 'expires':
-                    $data['expires'] = $user->config->EXPIRATION_DATE
-                        ? date('c', $user->config->EXPIRATION_DATE)
+                    $expires = \UserConfig::get($user['user_id'])->EXPIRATION_DATE;
+                    $data['expires'] = $expires
+                        ? date('c', $expires)
                         : '';
                     break;
                 case 'language':
                     $data['language'] = $user['preferred_language'] ?: \Config::get()->DEFAULT_LANGUAGE;
                     break;
                 case 'gender':
-                    $map_geschlecht = [
+                    /*$map_geschlecht = [
                         0 => '',
                         1 => 'm',
                         2 => 'f',
                         3 => 'd'
-                    ];
-                    $data['gender'] = $map_geschlecht[$user['geschlecht']];
+                    ];*/
+                    $data['gender'] = $user['geschlecht'];
                     break;
                 case 'visible':
                     $data['visible'] = $user['visible'];
@@ -150,6 +155,19 @@ class UserExportData
                     $statement->execute([$user['user_id']]);
                     $userdomains = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
                     $data['userdomains'] = $userdomains
+                        ? implode('|', $userdomains)
+                        : '';
+                    break;
+                case 'userdomain_ids':
+                    $statement = \DBManager::get()->prepare("
+                        SELECT userdomains.userdomain_id
+                        FROM userdomains
+                            INNER JOIN user_userdomains ON (user_userdomains.userdomain_id = userdomains.userdomain_id)
+                        WHERE user_userdomains.user_id = ?
+                    ");
+                    $statement->execute([$user['user_id']]);
+                    $userdomains = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
+                    $data['userdomain_ids'] = $userdomains
                         ? implode('|', $userdomains)
                         : '';
                     break;
