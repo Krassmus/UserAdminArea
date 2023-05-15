@@ -364,6 +364,6 @@
 
     <div data-dialog-button>
         <?= \Studip\Button::create(_("Speichern"), "save") ?>
-        <?= \Studip\Button::create(_("Alle löschen"), "delete", array('formaction' => PluginEngine::getURL($plugin, array(), "user/delete_all"), 'onClick' => "return window.confirm('"._("Wirklich alle diese Nutzer löschen?")."');")) ?>
+        <?= \Studip\Button::create(sprintf(_("Alle %s löschen"), count($users)), "delete", array('formaction' => PluginEngine::getURL($plugin, array(), "user/delete_all"), 'onClick' => "return window.confirm('"._("Wirklich alle diese Nutzer löschen?")."');")) ?>
     </div>
 </form>

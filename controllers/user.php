@@ -226,6 +226,7 @@ class UserController extends PluginController
                 }
                 $umanager = new UserManagement($user->getId());
                 $success += $umanager->deleteUser() ? 1 : 0;
+                $user->delete();
             }
             PageLayout::postMessage(MessageBox::success(sprintf(_("%s Nutzer erfolgreich gelöscht."), $success)));
             if ($success < count($this->users)) {

@@ -29,6 +29,7 @@ class UserExportData
             'userdomains' => _('Nutzerdomänen'),
             'userdomain_ids' => _('Nutzerdomänen-IDs'),
             'roles' => _('Rollen'),
+            'role_ids' => _('Rollen-IDs'),
             'studycourses' => _('Studiengänge'),
             'institutes' => _('Einrichtungen')
         ];
@@ -175,6 +176,12 @@ class UserExportData
                     $roles = \RolePersistence::getAssignedRoles($user['user_id']);
                     $data['roles'] = $roles
                         ? implode('|', array_map(function ($r) { return $r->getRolename(); }, $roles))
+                        : '';
+                    break;
+                case 'role_ids':
+                    $roles = \RolePersistence::getAssignedRoles($user['user_id']);
+                    $data['role_ids'] = $roles
+                        ? implode('|', array_map(function ($r) { return $r->getRoleid(); }, $roles))
                         : '';
                     break;
                 case 'studycourses':
