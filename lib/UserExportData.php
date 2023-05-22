@@ -5,7 +5,6 @@ namespace UserAdmin;
 class UserExportData
 {
     protected $attributes = [];
-    public $data = [];
 
     public function __construct()
     {
@@ -39,7 +38,9 @@ class UserExportData
             unset($this->attributes['last_activity']);
             unset($this->attributes['expires']);
             unset($this->attributes['userdomains']);
+            unset($this->attributes['userdomain_ids']);
             unset($this->attributes['roles']);
+            unset($this->attributes['role_ids']);
             unset($this->attributes['studycourses']);
             unset($this->attributes['institutes']);
         }
@@ -74,160 +75,160 @@ class UserExportData
         return $this->attributes;
     }
 
-    public function getDataForUser($user)
+    public function getUserQuery(array $attributes)
     {
-        $data = [];
-        foreach ($this->attributes as $index => $name) {
-            switch ($index) {
-                case 'user_id':
-                    $data['user_id'] = $user['user_id'];
-                    break;
-                case 'title_front':
-                    $data['title_front'] = $user['title_front'];
-                    break;
+        $query = \UserAdminArea::getUsersQuery();
+        foreach ($attributes as $attribute) {
+            switch ($attribute) {
                 case 'vorname':
-                    $data['vorname'] = $user['Vorname'];
+                    $query->select('`auth_user_md5`.`Vorname` AS `vorname`');
                     break;
                 case 'nachname':
-                    $data['nachname'] = $user['Nachname'];
-                    break;
-                case 'title_rear':
-                    $data['title_rear'] = $user['title_rear'];
+                    $query->select('`auth_user_md5`.`Nachname` AS `nachname`');
                     break;
                 case 'email':
-                    $data['email'] = $user['Email'];
-                    break;
-                case 'username':
-                    $data['username'] = $user['username'];
-                    break;
-                case 'avatar':
-                    $data['avatar'] = \Avatar::getAvatar($user['user_id'])->getURL(\Avatar::NORMAL);
+                    $query->select('`auth_user_md5`.`Email` AS `email`');
                     break;
                 case 'status':
-                    $data['status'] = $user['perms'];
-                    break;
-                case 'locked':
-                    $data['locked'] = $user['locked'];
-                    break;
-                case 'lock_comment':
-                    $data['lock_comment'] = $user['lock_comment'];
-                    break;
-                case 'last_activity':
-                    $statement = \DBManager::get()->prepare("
-                        SELECT last_lifesign
-                        FROM user_online
-                        WHERE user_id = :user_id
-                    ");
-                    $statement->execute(array(
-                        'user_id' => $user['user_id']
-                    ));
-                    $data['last_activity'] = $statement->fetch(\PDO::FETCH_COLUMN, 0);
-                    $data['last_activity'] = $data['last_activity']
-                        ? date('c', $data['last_activity'])
-                        : '';
-                case 'expires':
-                    $expires = \UserConfig::get($user['user_id'])->EXPIRATION_DATE;
-                    $data['expires'] = $expires
-                        ? date('c', $expires)
-                        : '';
-                    break;
-                case 'language':
-                    $data['language'] = $user['preferred_language'] ?: \Config::get()->DEFAULT_LANGUAGE;
+                    $query->select('`auth_user_md5`.`perms` AS `status`');
                     break;
                 case 'gender':
-                    /*$map_geschlecht = [
-                        0 => '',
-                        1 => 'm',
-                        2 => 'f',
-                        3 => 'd'
-                    ];*/
-                    $data['gender'] = $user['geschlecht'];
+                    $query->select('`user_info`.`geschlecht` AS `gender`');
                     break;
-                case 'visible':
-                    $data['visible'] = $user['visible'];
+                case 'last_activity':
+                    $query->join(
+                        'user_online',
+                        'user_online',
+                        "`user_online`.`user_id` = `auth_user_md5`.`user_id`",
+                        'LEFT JOIN'
+                    );
+                    $query->select('FROM_UNIXTIME(`user_online`.`last_lifesign`) AS `last_activity`');
+                    break;
+                case 'expires':
+                    $query->join(
+                        'user_config_expires',
+                        'config_values',
+                        "`user_config_expires`.`field` = 'EXPIRATION_DATE' AND `user_config_expires`.`range_id` = `auth_user_md5`.`user_id`",
+                        'LEFT JOIN'
+                    );
+                    $query->select('FROM_UNIXTIME(`user_config_expires`.`value`) AS `expires`');
+                    break;
+                case 'language':
+                    $query->select('`user_info`.`preferred_language` AS `language`');
                     break;
                 case 'userdomains':
-                    $statement = \DBManager::get()->prepare("
-                        SELECT userdomains.name
-                        FROM userdomains
-                            INNER JOIN user_userdomains ON (user_userdomains.userdomain_id = userdomains.userdomain_id)
-                        WHERE user_userdomains.user_id = ?
-                    ");
-                    $statement->execute([$user['user_id']]);
-                    $userdomains = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
-                    $data['userdomains'] = $userdomains
-                        ? implode('|', $userdomains)
-                        : '';
+                    $query->join(
+                        'user_userdomains',
+                        'user_userdomains',
+                        "`user_userdomains`.`user_id` = `auth_user_md5`.`user_id`",
+                        'LEFT JOIN'
+                    );
+                    $query->join(
+                        'userdomains',
+                        'userdomains',
+                        "`user_userdomains`.`userdomain_id` = `userdomains`.`userdomain_id`",
+                        'LEFT JOIN'
+                    );
+                    $query->select("GROUP_CONCAT(DISTINCT `userdomains`.`name` ORDER BY `userdomains`.`name` ASC SEPARATOR '|') AS `userdomains`");
                     break;
                 case 'userdomain_ids':
-                    $statement = \DBManager::get()->prepare("
-                        SELECT userdomains.userdomain_id
-                        FROM userdomains
-                            INNER JOIN user_userdomains ON (user_userdomains.userdomain_id = userdomains.userdomain_id)
-                        WHERE user_userdomains.user_id = ?
-                    ");
-                    $statement->execute([$user['user_id']]);
-                    $userdomains = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
-                    $data['userdomain_ids'] = $userdomains
-                        ? implode('|', $userdomains)
-                        : '';
+                    $query->join(
+                        'user_userdomains',
+                        'user_userdomains',
+                        "`user_userdomains`.`user_id` = `auth_user_md5`.`user_id`",
+                        'LEFT JOIN'
+                    );
+                    $query->select("GROUP_CONCAT(DISTINCT `user_userdomains`.`userdomain_id` SEPARATOR '|') AS `userdomain_ids`");
                     break;
                 case 'roles':
-                    $roles = \RolePersistence::getAssignedRoles($user['user_id']);
-                    $data['roles'] = $roles
-                        ? implode('|', array_map(function ($r) { return $r->getRolename(); }, $roles))
-                        : '';
+                    $query->join(
+                        'roles_user',
+                        'roles_user',
+                        "`roles_user`.`userid` = `auth_user_md5`.`user_id`",
+                        'LEFT JOIN'
+                    );
+                    $query->join(
+                        'roles',
+                        'roles',
+                        "`roles`.`roleid` = `roles_user`.`roleid`",
+                        'LEFT JOIN'
+                    );
+                    $query->select("GROUP_CONCAT(DISTINCT `roles`.`rolename` ORDER BY `roles`.`rolename` ASC SEPARATOR '|') AS `roles`");
                     break;
                 case 'role_ids':
-                    $roles = \RolePersistence::getAssignedRoles($user['user_id']);
-                    $data['role_ids'] = $roles
-                        ? implode('|', array_map(function ($r) { return $r->getRoleid(); }, $roles))
-                        : '';
+                    $query->join(
+                        'roles_user',
+                        'roles_user',
+                        "`roles_user`.`userid` = `auth_user_md5`.`user_id`",
+                        'LEFT JOIN'
+                    );
+                    $query->select("GROUP_CONCAT(DISTINCT `roles_user`.`roleid` SEPARATOR '|') AS `role_ids`");
                     break;
                 case 'studycourses':
-                    $statement = \DBManager::get()->prepare("
-                        SELECT CONCAT(abschluss.name, ' ', user_studiengang.semester)
-                        FROM user_studiengang
-                            LEFT JOIN fach ON (fach.fach_id = user_studiengang.fach_id)
-                            LEFT JOIN abschluss ON (abschluss.abschluss_id = user_studiengang.abschluss_id)
-                        WHERE user_studiengang.user_id = ?
-                    ");
-                    $statement->execute([$user['user_id']]);
-                    $studiengaenge = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
-                    $data['studycourses'] = $studiengaenge
-                        ? implode('|', $studiengaenge)
-                        : '';
-                    break;
+                    $query->join(
+                        'user_studiengang',
+                        'user_studiengang',
+                        "`user_studiengang`.`user_id` = `auth_user_md5`.`user_id`",
+                        'LEFT JOIN'
+                    );
+                    $query->join(
+                        'fach',
+                        'fach',
+                        "`fach`.`fach_id` = `user_studiengang`.`fach_id`",
+                        'LEFT JOIN'
+                    );
+                    $query->join(
+                        'abschluss',
+                        'abschluss',
+                        "`abschluss`.`abschluss_id` = `user_studiengang`.`abschluss_id`",
+                        'LEFT JOIN'
+                    );
+                    $query->select("GROUP_CONCAT(DISTINCT CONCAT(`fach`.`name`, ' ', `abschluss`.`name`, ' ', `user_studiengang`.`semester`) SEPARATOR '|') AS `studycourses`");
                 case 'institutes':
-                    $statement = \DBManager::get()->prepare("
-                        SELECT Name
-                        FROM Institute
-                            INNER JOIN user_inst ON (user_inst.Institut_id = Institute.Institut_id)
-                        WHERE user_inst.user_id = ?
-                    ");
-                    $statement->execute([$user['user_id']]);
-                    $institutes = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
-                    $data['institutes'] = $institutes
-                        ? implode('|', $institutes)
-                        : '';
+                    $query->join(
+                        'user_inst',
+                        'user_inst',
+                        "`user_inst`.`user_id` = `auth_user_md5`.`user_id`",
+                        'LEFT JOIN'
+                    );
+                    $query->join(
+                        'Institute',
+                        'Institute',
+                        "`Institute`.`Institut_id` = `user_inst`.`Institut_id`",
+                        'LEFT JOIN'
+                    );
+                    $query->select("GROUP_CONCAT(DISTINCT `Institute`.`Name` ORDER BY `Institute`.`Name` ASC SEPARATOR '|') AS `institutes`");
                     break;
                 default:
-                    if (preg_match('/^[a-f0-9]{32}$/', $index)) {
-                        if (isset($this->attributes[$index])) {
-                            $datafield_entry = \DatafieldEntryModel::findOneBySQL('datafield_id = :datafield_id AND range_id = :user_id', [
-                                'datafield_id' => $index,
-                                'user_id' => $user['user_id']
-                            ]);
-                            $data[$index] = $datafield_entry ? $datafield_entry['content'] : '';
+                    if (preg_match('/^[a-f0-9]{32}$/', $attribute)) {
+                        if (isset($this->attributes[$attribute])) {
+                            $query->join(
+                                'df_'.$attribute,
+                                'datafields_entries',
+                                "`df_".$attribute."`.`datafield_id` = '".$attribute."' AND `df_".$attribute."`.`range_id` = `auth_user_md5`.`user_id`",
+                                'LEFT JOIN'
+                            );
+                            $query->select('`df_'.$attribute.'`.`content` AS `'.$attribute.'`');
                         }
                     }
             }
         }
-        $this->data[$user['user_id']] = $data;
-        \NotificationCenter::postNotification('UserAdminAreaUserExportDataReturnsDataForUser', $this, $user);
-        $data = $this->data[$user['user_id']];
-        unset($this->data[$user['user_id']]);
-        return $data;
+        return $query;
+    }
+
+    public function mapDataForUser(array $user)
+    {
+        foreach ($this->attributes as $index => $name) {
+            switch ($index) {
+                case 'avatar':
+                    $user['avatar'] = \Avatar::getAvatar($user['user_id'])->getURL(\Avatar::NORMAL);
+                    break;
+                case 'language':
+                    $user['language'] = $user['language'] ?: \Config::get()->DEFAULT_LANGUAGE;
+                    break;
+            }
+        }
+        return $user;
     }
 
     protected function datafieldAccessAllowed(\DataField $datafield, $user = null)

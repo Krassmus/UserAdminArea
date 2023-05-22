@@ -37,11 +37,10 @@ class ExportController extends PluginController
         }
         $output[] = $names;
 
-        $query = UserAdminArea::getUsersQuery();
+        $query = $exportdata->getUserQuery($attributes);
         $i = 1;
-        while ($userdata = $query->fetch()) {
-            //$user = User::buildExisting($userdata);
-            $data = $exportdata->getDataForUser($userdata);
+        while ($data = $query->fetch()) {
+            $data = $exportdata->mapDataForUser($data);
             $output_row = [];
             foreach ($attributes as $index) {
                 if (isset($attributes_names[$index])) {
