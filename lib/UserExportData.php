@@ -102,7 +102,7 @@ class UserExportData
                         "`user_online`.`user_id` = `auth_user_md5`.`user_id`",
                         'LEFT JOIN'
                     );
-                    $query->select('FROM_UNIXTIME(`user_online`.`last_lifesign`) AS `last_activity`');
+                    $query->select("FROM_UNIXTIME(`user_online`.`last_lifesign`, '%Y-%m-%d %H:%i:%s') AS `last_activity`");
                     break;
                 case 'expires':
                     $query->join(
@@ -111,7 +111,7 @@ class UserExportData
                         "`user_config_expires`.`field` = 'EXPIRATION_DATE' AND `user_config_expires`.`range_id` = `auth_user_md5`.`user_id`",
                         'LEFT JOIN'
                     );
-                    $query->select('FROM_UNIXTIME(`user_config_expires`.`value`) AS `expires`');
+                    $query->select("FROM_UNIXTIME(`user_config_expires`.`value`, '%Y-%m-%d %H:%i:%s') AS `expires`");
                     break;
                 case 'language':
                     $query->select('`user_info`.`preferred_language` AS `language`');
@@ -183,7 +183,7 @@ class UserExportData
                         "`abschluss`.`abschluss_id` = `user_studiengang`.`abschluss_id`",
                         'LEFT JOIN'
                     );
-                    $query->select("GROUP_CONCAT(DISTINCT CONCAT(`fach`.`name`, ' ', `abschluss`.`name`, ' ', `user_studiengang`.`semester`) SEPARATOR '|') AS `studycourses`");
+                    $query->select("GROUP_CONCAT(DISTINCT CONCAT(`fach`.`name`, ': ', `abschluss`.`name`, ': ', `user_studiengang`.`semester`) SEPARATOR '|') AS `studycourses`");
                 case 'institutes':
                     $query->join(
                         'user_inst',
