@@ -20,6 +20,7 @@ class UserExportData
             'status' => _('Status'),
             'locked' => _('Gesperrt'),
             'lock_comment' => _('Sperrkommentar'),
+            'registriert' => _('Registriert seit'),
             'last_activity' => _('Zuletzt Online'),
             'expires' => _("Ablaufdatum"),
             'language' => _('Sprache'),
@@ -36,6 +37,7 @@ class UserExportData
             unset($this->attributes['locked']);
             unset($this->attributes['lock_comment']);
             unset($this->attributes['last_activity']);
+            unset($this->attributes['registriert']);
             unset($this->attributes['expires']);
             unset($this->attributes['userdomains']);
             unset($this->attributes['userdomain_ids']);
@@ -94,6 +96,9 @@ class UserExportData
                     break;
                 case 'gender':
                     $query->select('`user_info`.`geschlecht` AS `gender`');
+                    break;
+                case 'registriert':
+                    $query->select("FROM_UNIXTIME(`user_info`.`mkdate`, '%Y-%m-%d %H:%i:%s') AS `registriert`");
                     break;
                 case 'last_activity':
                     $query->join(
