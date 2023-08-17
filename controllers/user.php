@@ -256,18 +256,21 @@ class UserController extends PluginController
 
     public function search_fach_action()
     {
-        $GLOBALS['user']->cfg->store('ADMIN_USER_FACH', Request::get("fach_id"));
+        $fach_id = Request::get("fach_id") !== 'all' ? Request::get("fach_id") : null;
+        $GLOBALS['user']->cfg->store('ADMIN_USER_FACH', $fach_id);
         $this->redirect("user/overview");
     }
 
     public function search_abschluss_action()
     {
-        $GLOBALS['user']->cfg->store('ADMIN_USER_ABSCHLUSS', Request::get("abschluss_id"));
+        $abschluss_id = Request::get("abschluss_id") !== 'all' ? Request::get("abschluss_id") : null;
+        $GLOBALS['user']->cfg->store('ADMIN_USER_ABSCHLUSS', $abschluss_id);
         $this->redirect("user/overview");
     }
 
     public function search_fachsemester_action()
     {
+        $fachsemester = Request::get("fachsemester") !== 'all' ? Request::get("fachsemester") : null;
         $GLOBALS['user']->cfg->store('ADMIN_USER_FACHSEMESTER', Request::get("fachsemester"));
         $this->redirect("user/overview");
     }

@@ -111,7 +111,7 @@ $faecher = new SelectWidget(
     "post"
 );
 $faecher->setOptions(
-    array('' => "")
+    array('all' => "-")
 );
 foreach (Fach::getAllEnriched() as $fach) {
     $faecher->addElement(
@@ -131,7 +131,7 @@ $abschluesse = new SelectWidget(
     "post"
 );
 $abschluesse->setOptions(
-    array('' => "")
+    array('all' => "-")
 );
 foreach (Abschluss::getAllEnriched() as $abschluss) {
     $abschluesse->addElement(
@@ -151,7 +151,7 @@ $fachsemester = new SelectWidget(
     "post"
 );
 $fachsemester->setOptions(
-    array('' => "")
+    array('all' => "-")
 );
 for ($i = 1; $i < 50; $i++) {
     $fachsemester->addElement(
@@ -217,7 +217,7 @@ $auth_filter = new SelectWidget(
     "post"
 );
 $auth_plugins = array(
-    '' => ""
+    '' => "-"
 );
 foreach ($GLOBALS['STUDIP_AUTH_PLUGIN'] as $ap) {
     $auth_plugins[mb_strtolower($ap)] = $ap;
@@ -237,7 +237,7 @@ $locked = new SelectWidget(
     "post"
 );
 $domains = array(
-    '' => "",
+    '' => "-",
     'USER_ADMIN_AREA_NULLDOMAIN' => "Null-Domäne"
 );
 foreach (UserDomain::getUserDomains() as $domain) {
@@ -279,7 +279,7 @@ foreach (DataField::getDataFields("user") as $datafield) {
             "post"
         );
         $options = array(
-            '' => "",
+            '' => "-",
             'yes' => _("Ja"),
             'no' =>  _("Nein")
         );
