@@ -25,6 +25,7 @@ namespace UserAdmin;
 class SQLQuery {
 
     public $settings = array();
+    public $postfetchFilters = [];
     public $name = null;
     protected $statement = null;
 
@@ -173,6 +174,13 @@ class SQLQuery {
         $statement = \DBManager::get()->prepare($sql);
         $statement->execute((array) $this->settings['parameter']);
         $alldata = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        foreach ($alldata as $index => $data) {
+            foreach ($this->postfetchFilters as $filter) {
+                if (!$filter($data['user_id'])) {
+                    unset($alldata[$index]);
+                }
+            }
+        }
         if (!$sorm_class) {
             return $alldata;
         } else {

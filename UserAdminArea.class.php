@@ -55,7 +55,7 @@ class UserAdminArea extends StudIPPlugin implements SystemPlugin
                 'abschluss_id' => $GLOBALS['user']->cfg->ADMIN_USER_ABSCHLUSS
             ));
         }
-        if ($GLOBALS['user']->cfg->ADMIN_USER_FACHSEMESTER) {
+        if ($GLOBALS['user']->cfg->ADMIN_USER_FACHSEMESTER && $GLOBALS['user']->cfg->ADMIN_USER_FACHSEMESTER !== 'all') {
             $query->join("user_studiengang", "user_studiengang.user_id = auth_user_md5.user_id", "INNER JOIN");
             $query->where("fachsemester","user_studiengang.semester = :fachsemester", array(
                 'fachsemester' => $GLOBALS['user']->cfg->ADMIN_USER_FACHSEMESTER
