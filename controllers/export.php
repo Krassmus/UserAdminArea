@@ -39,8 +39,14 @@ class ExportController extends PluginController
 
         $query = $exportdata->getUserQuery($attributes);
         $i = 1;
+        $hull = new UserAdminAreaHull();
+        $hull->metadata = [
+            'attributes' => $attributes
+        ];
         while ($data = $query->fetch()) {
-            $data = $exportdata->mapDataForUser($data);
+            $hull->innerValue = $data;
+            $exportdata->mapDataForUser($hull);
+            $data = $hull->innerValue;
             $output_row = [];
             foreach ($attributes as $index) {
                 if (isset($attributes_names[$index])) {

@@ -3,6 +3,7 @@
 require_once __DIR__."/lib/SQLQuery.class.php";
 require_once __DIR__."/lib/UserExportData.php";
 require_once __DIR__.'/lib/SuperDatafieldAccess.php';
+require_once __DIR__.'/lib/UserAdminAreaHull.php';
 
 class UserAdminArea extends StudIPPlugin implements SystemPlugin
 {

@@ -221,19 +221,20 @@ class UserExportData
         return $query;
     }
 
-    public function mapDataForUser(array $user)
+    public function mapDataForUser(\UserAdminAreaHull $hull)
     {
         foreach ($this->attributes as $index => $name) {
             switch ($index) {
                 case 'avatar':
-                    $user['avatar'] = \Avatar::getAvatar($user['user_id'])->getURL(\Avatar::NORMAL);
+                    $hull->innerValue['avatar'] = \Avatar::getAvatar($hull->innerValue['user_id'])->getURL(\Avatar::NORMAL);
                     break;
                 case 'language':
-                    $user['language'] = $user['language'] ?: \Config::get()->DEFAULT_LANGUAGE;
+                    $hull->innerValue['language'] = $hull->innerValue['language'] ?: \Config::get()->DEFAULT_LANGUAGE;
                     break;
             }
         }
-        return $user;
+        \NotificationCenter::postNotification('UserAdminAreaUserExportData', $hull);
+        return $hull;
     }
 
     protected function datafieldAccessAllowed(\DataField $datafield, $user = null)
