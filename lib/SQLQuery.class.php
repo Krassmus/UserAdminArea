@@ -150,7 +150,7 @@ class SQLQuery {
         $sql = "SELECT COUNT(*) FROM (SELECT `".$this->settings['table']."`.* ".$this->getQuery().") AS counter_table";
 
         $statement = \DBManager::get()->prepare($sql);
-        $statement->execute((array) $this->settings['parameter']);
+        $statement->execute(isset($this->settings['parameter']) ? (array) $this->settings['parameter'] : []);
 
         return (int) $statement->fetch(\PDO::FETCH_COLUMN, 0);
     }
@@ -172,7 +172,7 @@ class SQLQuery {
         $sql .= $this->getQuery();
 
         $statement = \DBManager::get()->prepare($sql);
-        $statement->execute((array) $this->settings['parameter']);
+        $statement->execute(isset($this->settings['parameter']) ? (array) $this->settings['parameter'] : []);
         $alldata = $statement->fetchAll(\PDO::FETCH_ASSOC);
         foreach ($alldata as $index => $data) {
             foreach ($this->postfetchFilters as $filter) {
@@ -258,20 +258,20 @@ class SQLQuery {
     protected function getQuery()
     {
         $sql = "FROM `".$this->settings['table']."` ";
-        if ($this->settings['joins']) {
+        if (isset($this->settings['joins']) && $this->settings['joins']) {
             foreach ($this->settings['joins'] as $alias => $joindata) {
                 $table = isset($joindata['table']) ? $joindata['table']." AS ".$alias : $alias;
                 $on = isset($joindata['on']) ? " ON (".$joindata['on'].")" : "";
                 $sql .= " ".(isset($joindata['join']) ? $joindata['join'] : "INNER JOIN")." ".$table.$on." ";
             }
         }
-        if ($this->settings['where']) {
+        if (isset($this->settings['where']) && $this->settings['where']) {
             $sql .= "WHERE ".implode(" AND ", $this->settings['where'])." ";
         }
-        if ($this->settings['groupby']) {
+        if (isset($this->settings['groupby']) && $this->settings['groupby']) {
             $sql .= "GROUP BY ".$this->settings['groupby']." ";
         }
-        if ($this->settings['order']) {
+        if (isset($this->settings['order']) && $this->settings['order']) {
             $sql .= "ORDER BY ".$this->settings['order']." ";
         }
         return $sql;
