@@ -93,7 +93,7 @@ class SQLQuery {
      * @param array $parameter
      * @return $this
      */
-    public function where($name, $condition = null, $parameter = array())
+    public function where($name, $condition = null, $parameter = [])
     {
         if ($condition === null) {
             unset($this->settings['where'][$name]);
@@ -102,7 +102,9 @@ class SQLQuery {
             $this->settings['parameter'] = array_merge((array) $this->settings['parameter'], $condition);
         } else {
             $this->settings['where'][$name] = $condition;
-            $this->settings['parameter'] = array_merge((array) $this->settings['parameter'], $parameter);
+            $this->settings['parameter'] = isset($this->settings['parameter'])
+                ? array_merge((array)$this->settings['parameter'], $parameter)
+                : $parameter;
         }
         return $this;
     }
@@ -165,8 +167,10 @@ class SQLQuery {
         \NotificationCenter::postNotification("SQLQueryWillExecute", $this);
         $sql = "SELECT `".$this->settings['table']."`.* ";
 
-        foreach ((array) $this->settings['select'] as $alias => $statement) {
-            $sql .= ', '. ($statement ? $statement." AS ".$alias." " : $alias);
+        if (isset($this->settings['select'])) {
+            foreach ((array)$this->settings['select'] as $alias => $statement) {
+                $sql .= ', ' . ($statement ? $statement . " AS " . $alias . " " : $alias);
+            }
         }
 
         $sql .= $this->getQuery();
